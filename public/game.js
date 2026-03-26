@@ -95,24 +95,29 @@ canvas.addEventListener('touchstart', e => {
   e.preventDefault();
   const cx = e.touches[0].clientX, cy = e.touches[0].clientY;
   updatePointer(cx, cy);
+  const prevState = state;
   handleClick(cx, cy);
-  pointerDown = true;
-  pointerDownTime = performance.now();
-  firedInitialShot = false;
+  // Only arm firing if we were already in PLAYING state (not a UI transition)
+  if (prevState === STATES.PLAYING) {
+    pointerDown = true;
+    pointerDownTime = performance.now();
+    firedInitialShot = false;
+  }
 }, { passive: false });
 canvas.addEventListener('mousedown', e => {
   updatePointer(e.clientX, e.clientY);
-  pointerDown = true;
-  pointerDownTime = performance.now();
-  firedInitialShot = false;
+  const prevState = state;
+  handleClick(e.clientX, e.clientY);
+  if (prevState === STATES.PLAYING) {
+    pointerDown = true;
+    pointerDownTime = performance.now();
+    firedInitialShot = false;
+  }
 });
 canvas.addEventListener('mouseup', () => { pointerDown = false; });
 canvas.addEventListener('touchend', e => { e.preventDefault(); pointerDown = false; }, { passive: false });
 
-canvas.addEventListener('click', e => {
-  const cx = e.clientX, cy = e.clientY;
-  handleClick(cx, cy);
-});
+// handleClick is called from mousedown/touchstart above — no separate click listener needed
 
 function handleClick(cx, cy) {
   if (state === STATES.TITLE) {
@@ -231,13 +236,13 @@ function generateWave(lvl) {
   const wave = [];
 
   while (slotsUsed < totalSlots && eligible.length > 0) {
-    // Weighted random: favor simpler types
+    // Weighted random: favor simpler types at lower levels, shift toward harder types as level increases
     const weights = eligible.map(([name]) => {
-      if (name === 'SCOUT') return 5;
-      if (name === 'SOLDIER') return 4;
-      if (name === 'TANK') return 2;
-      if (name === 'ELITE') return 1;
-      if (name === 'SWARM') return 2;
+      if (name === 'SCOUT') return Math.max(1, 6 - lvl * 0.3);
+      if (name === 'SOLDIER') return Math.max(1, 5 - lvl * 0.2);
+      if (name === 'TANK') return Math.min(5, 1 + lvl * 0.3);
+      if (name === 'ELITE') return Math.min(4, 0.5 + lvl * 0.25);
+      if (name === 'SWARM') return Math.min(4, 1 + lvl * 0.2);
       return 1;
     });
     const totalWeight = weights.reduce((a, b) => a + b, 0);
