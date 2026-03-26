@@ -63,6 +63,7 @@ let pointerX = 0, pointerY = 0;
 let pointerDown = false;
 let pointerDownTime = 0;
 let firedInitialShot = false;
+const keys = {};
 
 // Damage flash
 let damageFlashTimer = 0;
@@ -117,7 +118,8 @@ canvas.addEventListener('mousedown', e => {
 canvas.addEventListener('mouseup', () => { pointerDown = false; });
 canvas.addEventListener('touchend', e => { e.preventDefault(); pointerDown = false; }, { passive: false });
 
-// handleClick is called from mousedown/touchstart above — no separate click listener needed
+window.addEventListener('keydown', e => { keys[e.key] = true; });
+window.addEventListener('keyup', e => { keys[e.key] = false; });
 
 function handleClick(cx, cy) {
   if (state === STATES.TITLE) {
@@ -452,6 +454,16 @@ function playerTakeDamage(amount) {
 // ============================================================
 function update(dt) {
   if (state !== STATES.PLAYING) return;
+
+  // --- Cannon Movement (Arrow Keys / WASD) ---
+  const CANNON_SPEED = 5;
+  if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
+    cannon.x -= CANNON_SPEED * dt * 60;
+  }
+  if (keys['ArrowRight'] || keys['d'] || keys['D']) {
+    cannon.x += CANNON_SPEED * dt * 60;
+  }
+  cannon.x = Math.max(CANNON_HITBOX_W / 2, Math.min(canvas.width - CANNON_HITBOX_W / 2, cannon.x));
 
   // --- Input / Firing ---
   player.fireTimer -= dt;
@@ -827,9 +839,13 @@ function renderTitle() {
   ctx.fillStyle = '#ff6600';
   ctx.fillText('DEFENSE', canvas.width / 2, canvas.height / 2 + 20);
 
+  ctx.fillStyle = '#aaaaaa';
+  ctx.font = '16px monospace';
+  ctx.fillText('by Richard', canvas.width / 2, canvas.height / 2 + 60);
+
   ctx.fillStyle = '#ffffff';
   ctx.font = '20px monospace';
-  ctx.fillText('Click to Start', canvas.width / 2, canvas.height / 2 + 80);
+  ctx.fillText('Click to Start', canvas.width / 2, canvas.height / 2 + 100);
 }
 
 function renderField() {
