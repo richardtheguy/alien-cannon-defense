@@ -139,8 +139,10 @@ A tap/click-to-shoot alien defense game where the player controls a cannon at th
 ### Screens
 1. **Title Screen** - "Alien Cannon Defense" + "Click to Start"
 2. **Gameplay** - Main game loop
-3. **Upgrade Selection** - Modal overlay with 2 upgrade choices
-4. **Game Over** - Final score + level reached + "Click to Restart"
+3. **Between Levels** - "Level X Complete" 3-second pause (skipped after boss kills)
+4. **Chest** - Clickable treasure chest on the playfield, "Click to Open"
+5. **Upgrade Selection** - Modal overlay with 2 upgrade choices
+6. **Game Over** - Final score + level reached + "Click to Restart"
 
 ---
 

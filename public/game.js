@@ -474,8 +474,8 @@ function update(dt) {
   // --- Bullets ---
   for (let i = bullets.length - 1; i >= 0; i--) {
     const b = bullets[i];
-    b.x += b.vx;
-    b.y += b.vy;
+    b.x += b.vx * dt * 60;
+    b.y += b.vy * dt * 60;
     if (b.x < -10 || b.x > canvas.width + 10 || b.y < -10 || b.y > canvas.height + 10) {
       b.alive = false;
     }
@@ -517,7 +517,7 @@ function update(dt) {
       }
     }
 
-    a.y += speed;
+    a.y += speed * dt * 60;
 
     if (a.y > canvas.height + a.radius) {
       a.alive = false;
@@ -548,7 +548,7 @@ function update(dt) {
     }
 
     if (boss.alive) {
-      boss.x += bossSpeed * boss.direction;
+      boss.x += bossSpeed * boss.direction * dt * 60;
       if (boss.x > canvas.width - boss.radius - 20) boss.direction = -1;
       if (boss.x < boss.radius + 20) boss.direction = 1;
 
@@ -583,8 +583,8 @@ function update(dt) {
   for (let i = bossProjectiles.length - 1; i >= 0; i--) {
     const bp = bossProjectiles[i];
     if (!bp.alive) continue;
-    bp.x += bp.vx;
-    bp.y += bp.vy;
+    bp.x += bp.vx * dt * 60;
+    bp.y += bp.vy * dt * 60;
     if (bp.y > canvas.height + 20 || bp.x < -20 || bp.x > canvas.width + 20) {
       bp.alive = false;
     }
@@ -598,8 +598,8 @@ function update(dt) {
   // --- Particles ---
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
-    p.x += p.vx;
-    p.y += p.vy;
+    p.x += p.vx * dt * 60;
+    p.y += p.vy * dt * 60;
     p.life -= dt;
     if (p.life <= 0) particles.splice(i, 1);
   }
@@ -617,17 +617,16 @@ function update(dt) {
 // LEVEL COMPLETION
 // ============================================================
 function levelComplete() {
-  state = STATES.BETWEEN_LEVELS;
-  betweenTimer = 3.0;
+  const wasBossLevel = isBossLevel(level);
 
   // Track non-boss clears
-  if (!isBossLevel(level)) {
+  if (!wasBossLevel) {
     nonBossClearCount++;
   }
 
   // Determine if chest should spawn
   chestPending = false;
-  if (isBossLevel(level)) {
+  if (wasBossLevel) {
     chestPending = true;
   } else if (nonBossClearCount % 3 === 0 && nonBossClearCount > 0) {
     chestPending = true;
@@ -640,14 +639,22 @@ function levelComplete() {
   if (isBossLevel(level)) {
     player.hp = Math.min(player.hp + 1, player.maxHp);
   }
+
+  // Boss kill → go straight to chest (no 3s pause)
+  if (wasBossLevel && chestPending) {
+    state = STATES.CHEST;
+  } else {
+    state = STATES.BETWEEN_LEVELS;
+    betweenTimer = 3.0;
+  }
 }
 
 function updateBetweenLevels(dt) {
   // Update particles during between-levels too
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
-    p.x += p.vx;
-    p.y += p.vy;
+    p.x += p.vx * dt * 60;
+    p.y += p.vy * dt * 60;
     p.life -= dt;
     if (p.life <= 0) particles.splice(i, 1);
   }
