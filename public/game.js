@@ -93,7 +93,9 @@ canvas.addEventListener('mousemove', e => updatePointer(e.clientX, e.clientY));
 canvas.addEventListener('touchmove', e => { e.preventDefault(); updatePointer(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
 canvas.addEventListener('touchstart', e => {
   e.preventDefault();
-  updatePointer(e.touches[0].clientX, e.touches[0].clientY);
+  const cx = e.touches[0].clientX, cy = e.touches[0].clientY;
+  updatePointer(cx, cy);
+  handleClick(cx, cy);
   pointerDown = true;
   pointerDownTime = performance.now();
   firedInitialShot = false;
@@ -111,9 +113,6 @@ canvas.addEventListener('click', e => {
   const cx = e.clientX, cy = e.clientY;
   handleClick(cx, cy);
 });
-canvas.addEventListener('touchstart', e => {
-  // handled via click for state transitions
-}, { passive: false });
 
 function handleClick(cx, cy) {
   if (state === STATES.TITLE) {
@@ -271,9 +270,12 @@ function generateWave(lvl) {
       spawnQueue.push({ ...wave[i], spawnTime: time, hpBonus, speedBonus });
     } else {
       spawnQueue.push({ ...wave[i], spawnTime: time, hpBonus, speedBonus });
-      if (!(wave[i].burst && i + 1 < wave.length && wave[i + 1].burst)) {
-        time += 0.8;
-      }
+    }
+    // Advance time after the last member of a burst, or after a non-burst alien
+    const isLastBurstMember = wave[i].burst && (i + 1 >= wave.length || !wave[i + 1].burst);
+    const isNonBurst = !wave[i].burst;
+    if (isLastBurstMember || isNonBurst) {
+      time += 0.8;
     }
   }
 
