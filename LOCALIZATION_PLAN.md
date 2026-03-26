@@ -54,16 +54,16 @@ const LANG = {
     title1: '外星人大炮',
     title2: '防御战',
     byline: '作者：Richard',
-    start: '点击开始',
+    start: '按下开始',
     levelComplete: '第 {n} 关完成！',
     nextLevel: '下一关：第 {n} 关',
-    openChest: '点击打开',
+    openChest: '按下打开',
     chooseUpgrade: '选择升级',
-    selectUpgrade: '[ 点击选择 ]',
+    selectUpgrade: '[ 按下选择 ]',
     gameOver: '游戏结束',
     score: '分数',
     level: '关卡',
-    restart: '点击重新开始',
+    restart: '按下重新开始',
     boss: 'BOSS',
     fireRate: '射速',
     firePower: '火力',
@@ -208,6 +208,7 @@ Apply `fitText()` to every constrained text area:
 | Upgrade card description | 240px | 14px | Same cards, description line |
 | Upgrade card select hint | 240px | 12px | Same cards, bottom hint |
 | Boss HP label | 290px (300px bar - 10px padding) | 14px | Currently 300px bar at game.js:1036 |
+| HUD top-left (level + score) | `canvas.width / 2 - 40` (half screen minus margin for hearts on right) | 18px | Currently at game.js:1098-1102. Measure text width; if it exceeds half the screen width, shrink font to fit without overlapping the heart row |
 | Game over text | `canvas.width - 40` | 48px | Full width |
 | Level complete text | `canvas.width - 40` | 36px | Full width |
 
@@ -269,15 +270,16 @@ Steps 3-6 are independent of each other and can be done in any order after Steps
 | 5 | Click EN button | All text switches back to English |
 | 6 | Start game in Chinese | HUD shows "关卡:" and "分数:" |
 | 7 | Level complete in Chinese | "第 X 关完成！" |
-| 8 | Chest in Chinese | "点击打开" |
+| 8 | Chest in Chinese | "按下打开" |
 | 9 | Upgrade overlay in Chinese | Chinese upgrade names and descriptions |
-| 10 | Game over in Chinese | "游戏结束", "点击重新开始" |
+| 10 | Game over in Chinese | "游戏结束", "按下重新开始" |
 | 11 | Boss HP bar in Chinese | "BOSS" label (kept in English) |
 | 12 | Upgrade indicators in Chinese | "射速", "火力", "冰冻", "燃烧" |
 | 13 | Chinese title fits on screen | Title auto-scales if wider than screen |
 | 14 | Chinese upgrade card text fits | Name, description, and hint text fit within 260px cards |
 | 15 | Chinese HUD pills fit | Indicator pills widen to fit Chinese labels without clipping |
-| 16 | Chinese game over text fits | "游戏结束" and "点击重新开始" fit within screen width |
-| 17 | Font renders correctly on mobile Chrome | Chinese characters display properly |
-| 18 | Language resets on page reload | Defaults to English |
-| 19 | Switch language mid-game not possible | Button only on title screen |
+| 16 | Chinese game over text fits | "游戏结束" and "按下重新开始" fit within screen width |
+| 17 | Chinese HUD text doesn't overlap hearts | "关卡:" and "分数:" labels stay in left half, no collision with heart row on right |
+| 18 | Font renders correctly on mobile Chrome | Chinese characters display properly |
+| 19 | Language resets on page reload | Defaults to English |
+| 20 | Switch language mid-game not possible | Button only on title screen |
