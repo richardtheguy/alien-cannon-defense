@@ -11,8 +11,11 @@ const MIME = {
   '.js': 'application/javascript',
 };
 
+const url = require('url');
+
 const server = http.createServer((req, res) => {
-  let filePath = path.join(PUBLIC, req.url === '/' ? 'index.html' : req.url);
+  const pathname = url.parse(req.url).pathname;
+  let filePath = path.join(PUBLIC, pathname === '/' ? 'index.html' : pathname);
   filePath = path.normalize(filePath);
 
   if (!filePath.startsWith(PUBLIC)) {
@@ -30,7 +33,12 @@ const server = http.createServer((req, res) => {
       res.end('Not Found');
       return;
     }
-    res.writeHead(200, { 'Content-Type': contentType });
+    res.writeHead(200, {
+      'Content-Type': contentType,
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    });
     res.end(data);
   });
 });

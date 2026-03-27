@@ -206,6 +206,116 @@ let bombTargetMode=false; // for bombing ability targeting
 // Bull rush visual
 let bullRushActive = false, bullRushX = 0, bullRushY = 0, bullRushAngle = 0, bullRushTimer = 0;
 
+// ============================================================
+// MUSIC (procedural epic background using Web Audio API)
+// ============================================================
+let audioCtx = null;
+let musicPlaying = false;
+let musicGain = null;
+
+function startMusic() {
+  if (musicPlaying) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  musicGain = audioCtx.createGain();
+  musicGain.gain.value = 0.18;
+  musicGain.connect(audioCtx.destination);
+  musicPlaying = true;
+  playMusicLoop();
+}
+
+function playMusicLoop() {
+  if (!musicPlaying) return;
+  const now = audioCtx.currentTime;
+
+  // Epic bass drone
+  const bassNotes = [55, 55, 65.41, 55, 73.42, 65.41, 55, 55]; // A1, A1, C2, A1, D2, C2, A1, A1
+  const beatLen = 0.5;
+  for (let i = 0; i < bassNotes.length; i++) {
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.value = bassNotes[i];
+    g.gain.setValueAtTime(0.3, now + i * beatLen);
+    g.gain.exponentialRampToValueAtTime(0.01, now + i * beatLen + beatLen * 0.9);
+    osc.connect(g); g.connect(musicGain);
+    osc.start(now + i * beatLen);
+    osc.stop(now + i * beatLen + beatLen);
+  }
+
+  // Driving rhythm (kick-like)
+  for (let i = 0; i < 8; i++) {
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(150, now + i * beatLen);
+    osc.frequency.exponentialRampToValueAtTime(30, now + i * beatLen + 0.1);
+    g.gain.setValueAtTime(0.4, now + i * beatLen);
+    g.gain.exponentialRampToValueAtTime(0.01, now + i * beatLen + 0.15);
+    osc.connect(g); g.connect(musicGain);
+    osc.start(now + i * beatLen);
+    osc.stop(now + i * beatLen + 0.2);
+  }
+
+  // Hi-hat pattern
+  for (let i = 0; i < 16; i++) {
+    const bufferSize = audioCtx.sampleRate * 0.05;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let j = 0; j < bufferSize; j++) data[j] = (Math.random() * 2 - 1) * 0.3;
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+    const g = audioCtx.createGain();
+    const hiTime = now + i * beatLen * 0.5;
+    g.gain.setValueAtTime(i % 2 === 0 ? 0.08 : 0.04, hiTime);
+    g.gain.exponentialRampToValueAtTime(0.001, hiTime + 0.04);
+    const hp = audioCtx.createBiquadFilter();
+    hp.type = 'highpass'; hp.frequency.value = 8000;
+    noise.connect(hp); hp.connect(g); g.connect(musicGain);
+    noise.start(hiTime);
+    noise.stop(hiTime + 0.05);
+  }
+
+  // Melody — epic minor scale arpeggios
+  const melodyNotes = [220, 261.63, 329.63, 392, 329.63, 261.63, 349.23, 293.66]; // A3, C4, E4, G4, E4, C4, F4, D4
+  for (let i = 0; i < melodyNotes.length; i++) {
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = melodyNotes[i];
+    const t = now + i * beatLen;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.15, t + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.01, t + beatLen * 0.8);
+    osc.connect(g); g.connect(musicGain);
+    osc.start(t);
+    osc.stop(t + beatLen);
+  }
+
+  // Pad / atmosphere
+  const padNotes = [130.81, 164.81, 196]; // C3, E3, G3 chord
+  for (const freq of padNotes) {
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    g.gain.setValueAtTime(0.04, now);
+    g.gain.setValueAtTime(0.04, now + bassNotes.length * beatLen - 0.1);
+    g.gain.linearRampToValueAtTime(0, now + bassNotes.length * beatLen);
+    osc.connect(g); g.connect(musicGain);
+    osc.start(now);
+    osc.stop(now + bassNotes.length * beatLen);
+  }
+
+  // Schedule next loop
+  const loopLen = bassNotes.length * beatLen;
+  setTimeout(() => playMusicLoop(), loopLen * 1000 - 50);
+}
+
+function stopMusic() {
+  musicPlaying = false;
+  if (musicGain) { musicGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3); }
+}
+
 // --- Init ---
 resize();
 
@@ -251,11 +361,11 @@ function handleClick(cx, cy) {
     if (cx >= langBtnX && cx <= langBtnX+LANG_BTN_W && cy >= LANG_BTN_Y && cy <= LANG_BTN_Y+LANG_BTN_H) {
       currentLang = currentLang === 'en' ? 'zh' : 'en'; return;
     }
-    // Help ? button top-left
-    if (cx >= 10 && cx <= 40 && cy >= 10 && cy <= 40) { state = STATES.HELP; return; }
-    resetGame(); state = STATES.PLAYING; startLevel(); return;
+    // Help ? button top-left (larger hitbox for easy tapping)
+    if (cx >= 5 && cx <= 55 && cy >= 5 && cy <= 55) { state = STATES.HELP; return; }
+    resetGame(); state = STATES.PLAYING; startLevel(); startMusic(); return;
   }
-  if (state === STATES.GAME_OVER) { resetGame(); state = STATES.PLAYING; startLevel(); return; }
+  if (state === STATES.GAME_OVER) { resetGame(); state = STATES.PLAYING; startLevel(); startMusic(); return; }
   if (state === STATES.CHEST) { openChest(); return; }
   if (state === STATES.ABILITY_SELECT) {
     const boxW=260, boxH=120, gap=20;
@@ -299,7 +409,7 @@ function handleClick(cx, cy) {
       }
     }
     // Help ? during gameplay
-    if (cx >= 10 && cx <= 40 && cy >= 65 && cy <= 95) { state = STATES.HELP; return; }
+    if (cx >= 5 && cx <= 55 && cy >= 55 && cy <= 105) { state = STATES.HELP; return; }
   }
 }
 
@@ -505,7 +615,7 @@ function killAlien(a){ a.alive=false; player.score+=a.points; aliensRemaining--;
 function damageBoss(dmg){ boss.hp-=dmg; applyStatusEffect(boss); if(boss.hp<=0) bossDeath(); }
 function bossDeath(){ boss.alive=false; bossProjectiles=[]; player.score+=boss.points; aliensRemaining=0; spawnParticles(boss.x,boss.y,boss.color,18,0.6); }
 function applyStatusEffect(t){ if(player.element==='freeze') t.freezeTimer=2.0; else if(player.element==='fire'){ t.burnTimer=3.0; t.burnDamageLeft=1.0; } }
-function playerTakeDamage(amt){ player.hp-=amt; damageFlashTimer=0.15; if(player.hp<=0){ player.hp=0; state=STATES.GAME_OVER; } }
+function playerTakeDamage(amt){ player.hp-=amt; damageFlashTimer=0.15; if(player.hp<=0){ player.hp=0; state=STATES.GAME_OVER; stopMusic(); } }
 
 // ============================================================
 // UPDATE
@@ -624,9 +734,7 @@ function update(dt) {
 function levelComplete() {
   const wasBoss = isBossLevel(level);
   if(!wasBoss) nonBossClearCount++;
-  chestPending = false;
-  if(wasBoss) chestPending=true;
-  else if(nonBossClearCount%2===0&&nonBossClearCount>0) chestPending=true;
+  chestPending = true; // chest every round
 
   // Check if ability should be offered (level 10 boss, and no ability yet)
   abilityPending = (level === 10 && wasBoss && !player.ability);
@@ -755,10 +863,10 @@ function renderTitle() {
 
   document.title=t('fullTitle');
 
-  // ? help button top-left
-  ctx.fillStyle='rgba(255,255,255,0.2)'; ctx.beginPath(); ctx.arc(25,25,15,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(25,25,15,0,Math.PI*2); ctx.stroke();
-  ctx.fillStyle='#ffffff'; ctx.font=makeFont(16,'bold'); ctx.textAlign='center'; ctx.fillText('?',25,31);
+  // ? help button top-left (bright yellow, unmissable)
+  ctx.fillStyle='#FFD700'; ctx.beginPath(); ctx.arc(30,30,22,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#ffffff'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(30,30,22,0,Math.PI*2); ctx.stroke();
+  ctx.fillStyle='#000000'; ctx.font=makeFont(24,'bold'); ctx.textAlign='center'; ctx.fillText('?',30,39);
 
   // Language button
   const lx=getLangBtnX();
@@ -869,9 +977,9 @@ function renderHUD(){
   ctx.fillStyle='#ffffff'; ctx.fillText(lt,10,25); ctx.fillText(st,10,50);
 
   // ? help button during gameplay
-  ctx.fillStyle='rgba(255,255,255,0.15)'; ctx.beginPath(); ctx.arc(25,80,12,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle='rgba(255,255,255,0.3)'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(25,80,12,0,Math.PI*2); ctx.stroke();
-  ctx.fillStyle='#ffffff'; ctx.font=makeFont(12,'bold'); ctx.textAlign='center'; ctx.fillText('?',25,85);
+  ctx.fillStyle='rgba(255,255,255,0.2)'; ctx.beginPath(); ctx.arc(30,80,16,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,0.4)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(30,80,16,0,Math.PI*2); ctx.stroke();
+  ctx.fillStyle='#ffffff'; ctx.font=makeFont(16,'bold'); ctx.textAlign='center'; ctx.fillText('?',30,86);
   ctx.textAlign='left';
 
   // Hearts
