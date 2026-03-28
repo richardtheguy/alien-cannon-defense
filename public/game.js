@@ -30,13 +30,13 @@ const LANG = {
     restart: 'Press to Restart', boss: 'BOSS',
     fireRate: 'Fire Rate', firePower: 'Fire Power', freeze: 'Freeze', fire: 'Fire',
     plusHp: '+1 HP',
-    fireAmount: 'Multi Shot', projectiles: 'Big Bullets', bounceShot: 'Bounce Shot',
+    fireAmount: 'Multi Shot', projectiles: 'Boomerang', bounceShot: 'Bounce Shot',
     fireRateDesc: '-0.08s delay', firePowerDesc: '+1 damage',
     freezeDesc: 'Slow aliens 50% for 2s', fireDesc: 'Burn 1 dmg over 3s', hpDesc: 'Restore 1 HP',
-    fireAmountDesc: '+1 bullet per shot', projectilesDesc: 'Bigger & faster bullets',
+    fireAmountDesc: '+1 bullet per shot', projectilesDesc: 'Bullets fly out and boomerang back',
     bounceShotDesc: 'Bullets bounce off walls',
     frLabel: 'FR', fpLabel: 'FP', freezeLabel: 'FREEZE', fireLabel: 'FIRE',
-    faLabel: 'MULTI', prLabel: 'BIG', bsLabel: 'BOUNCE',
+    faLabel: 'MULTI', prLabel: 'BOOM', bsLabel: 'BOUNCE',
     langButton: '中文',
     chooseAbility: 'Choose an Ability',
     abilityOverkill: 'Overkill', abilityBombing: 'Bombing',
@@ -67,7 +67,7 @@ const LANG = {
     helpFireRate: 'Fire Rate - shoot faster (stacks 5x)',
     helpFirePower: 'Fire Power - more damage per bullet (stacks 5x)',
     helpMultiShot: 'Multi Shot - fire extra bullets per shot (stacks 3x)',
-    helpBigBullets: 'Big Bullets - larger & faster bullets (stacks 3x)',
+    helpBigBullets: 'Boomerang - bullets fly out and return, pierce on return (stacks 3x)',
     helpBounce: 'Bounce Shot - bullets bounce off walls',
     helpFreeze: 'Freeze - slow aliens by 50% for 2s',
     helpFire: 'Fire - burn aliens for extra damage over 3s',
@@ -95,13 +95,13 @@ const LANG = {
     restart: '按下重新开始', boss: 'BOSS',
     fireRate: '射速', firePower: '火力', freeze: '冰冻', fire: '燃烧',
     plusHp: '+1 生命',
-    fireAmount: '多重射击', projectiles: '大子弹', bounceShot: '反弹射击',
+    fireAmount: '多重射击', projectiles: '回旋弹', bounceShot: '反弹射击',
     fireRateDesc: '射击间隔 -0.08秒', firePowerDesc: '伤害 +1',
     freezeDesc: '减速外星人50% 持续2秒', fireDesc: '灼烧 1点伤害 持续3秒', hpDesc: '恢复 1 生命值',
-    fireAmountDesc: '每次射击+1子弹', projectilesDesc: '更大更快的子弹',
+    fireAmountDesc: '每次射击+1子弹', projectilesDesc: '子弹飞出后回旋返回',
     bounceShotDesc: '子弹可反弹墙壁',
     frLabel: '射速', fpLabel: '火力', freezeLabel: '冰冻', fireLabel: '燃烧',
-    faLabel: '多重', prLabel: '大弹', bsLabel: '反弹',
+    faLabel: '多重', prLabel: '回旋', bsLabel: '反弹',
     langButton: 'EN',
     chooseAbility: '选择技能',
     abilityOverkill: '全灭', abilityBombing: '轰炸',
@@ -129,7 +129,7 @@ const LANG = {
     helpFireRate: '射速——射击更快（可叠加5次）',
     helpFirePower: '火力——每颗子弹伤害更高（可叠加5次）',
     helpMultiShot: '多重射击——每次多发1颗子弹（可叠加3次）',
-    helpBigBullets: '大子弹——更大更快的子弹（可叠加3次）',
+    helpBigBullets: '回旋弹——子弹飞出后返回，返回时穿透敌人（可叠加3次）',
     helpBounce: '反弹射击——子弹可反弹墙壁',
     helpFreeze: '冰冻——减速外星人50%持续2秒',
     helpFire: '燃烧——额外灼烧伤害持续3秒',
@@ -164,15 +164,15 @@ function getLangBtnX() { return canvas.width - 85; }
 
 // --- Constants ---
 const ALIEN_TYPES = {
-  SCOUT:   { color: '#33cc33', baseHp: 1, baseSpeed: 2.5, points: 10,  radius: 15, minLevel: 1 },
-  SOLDIER: { color: '#cccc00', baseHp: 2, baseSpeed: 1.8, points: 25,  radius: 18, minLevel: 2 },
-  TANK:    { color: '#cc3333', baseHp: 4, baseSpeed: 1.0, points: 50,  radius: 22, minLevel: 4 },
-  ELITE:   { color: '#9933cc', baseHp: 6, baseSpeed: 1.8, points: 75,  radius: 20, minLevel: 7 },
-  SWARM:   { color: '#00cccc', baseHp: 1, baseSpeed: 3.5, points: 15,  radius: 12, minLevel: 5 },
+  SCOUT:   { color: '#33cc33', baseHp: 1, baseSpeed: 2.5, points: 10,  radius: 22, minLevel: 1 },
+  SOLDIER: { color: '#cccc00', baseHp: 2, baseSpeed: 1.8, points: 25,  radius: 26, minLevel: 2 },
+  TANK:    { color: '#cc3333', baseHp: 4, baseSpeed: 1.0, points: 50,  radius: 30, minLevel: 4 },
+  ELITE:   { color: '#9933cc', baseHp: 6, baseSpeed: 1.8, points: 75,  radius: 28, minLevel: 7 },
+  SWARM:   { color: '#00cccc', baseHp: 1, baseSpeed: 3.5, points: 15,  radius: 18, minLevel: 5 },
 };
 
 const STATES = { TITLE:0, PLAYING:1, BETWEEN_LEVELS:2, CHEST:3, UPGRADE:4, GAME_OVER:5, HELP:6, ABILITY_SELECT:7 };
-const BULLET_SPEED = 8, BULLET_RADIUS = 4;
+const BULLET_SPEED = 8, BULLET_RADIUS = 7;
 const BOSS_PROJ_RADIUS = 8, BOSS_PROJ_SPEED = 2.5, BOSS_PROJ_HP = 3;
 const BOSS_ATTACK_INTERVAL = 2.5, BOSS_TELEGRAPH_DURATION = 0.6;
 const CANNON_HITBOX_W = 60, CANNON_HITBOX_H = 40;
@@ -207,15 +207,28 @@ let bombTargetMode=false; // for bombing ability targeting
 let bullRushActive = false, bullRushX = 0, bullRushY = 0, bullRushAngle = 0, bullRushTimer = 0;
 
 // ============================================================
-// MUSIC (procedural epic background using Web Audio API)
+// AUDIO (Web Audio API — music + SFX)
 // ============================================================
 let audioCtx = null;
 let musicPlaying = false;
 let musicGain = null;
+let sfxGain = null;
+let musicTimeout = null;
+
+function ensureAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    sfxGain = audioCtx.createGain();
+    sfxGain.gain.value = 0.25;
+    sfxGain.connect(audioCtx.destination);
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
 
 function startMusic() {
+  ensureAudioCtx();
   if (musicPlaying) return;
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  // Create a fresh gain node for music
   musicGain = audioCtx.createGain();
   musicGain.gain.value = 0.18;
   musicGain.connect(audioCtx.destination);
@@ -228,7 +241,7 @@ function playMusicLoop() {
   const now = audioCtx.currentTime;
 
   // Epic bass drone
-  const bassNotes = [55, 55, 65.41, 55, 73.42, 65.41, 55, 55]; // A1, A1, C2, A1, D2, C2, A1, A1
+  const bassNotes = [55, 55, 65.41, 55, 73.42, 65.41, 55, 55];
   const beatLen = 0.5;
   for (let i = 0; i < bassNotes.length; i++) {
     const osc = audioCtx.createOscillator();
@@ -242,7 +255,7 @@ function playMusicLoop() {
     osc.stop(now + i * beatLen + beatLen);
   }
 
-  // Driving rhythm (kick-like)
+  // Driving kick
   for (let i = 0; i < 8; i++) {
     const osc = audioCtx.createOscillator();
     const g = audioCtx.createGain();
@@ -256,27 +269,24 @@ function playMusicLoop() {
     osc.stop(now + i * beatLen + 0.2);
   }
 
-  // Hi-hat pattern
+  // Hi-hat
   for (let i = 0; i < 16; i++) {
-    const bufferSize = audioCtx.sampleRate * 0.05;
-    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let j = 0; j < bufferSize; j++) data[j] = (Math.random() * 2 - 1) * 0.3;
-    const noise = audioCtx.createBufferSource();
-    noise.buffer = buffer;
+    const bufSz = audioCtx.sampleRate * 0.05;
+    const buf = audioCtx.createBuffer(1, bufSz, audioCtx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let j = 0; j < bufSz; j++) d[j] = (Math.random() * 2 - 1) * 0.3;
+    const n = audioCtx.createBufferSource(); n.buffer = buf;
     const g = audioCtx.createGain();
-    const hiTime = now + i * beatLen * 0.5;
-    g.gain.setValueAtTime(i % 2 === 0 ? 0.08 : 0.04, hiTime);
-    g.gain.exponentialRampToValueAtTime(0.001, hiTime + 0.04);
-    const hp = audioCtx.createBiquadFilter();
-    hp.type = 'highpass'; hp.frequency.value = 8000;
-    noise.connect(hp); hp.connect(g); g.connect(musicGain);
-    noise.start(hiTime);
-    noise.stop(hiTime + 0.05);
+    const ht = now + i * beatLen * 0.5;
+    g.gain.setValueAtTime(i % 2 === 0 ? 0.08 : 0.04, ht);
+    g.gain.exponentialRampToValueAtTime(0.001, ht + 0.04);
+    const hp = audioCtx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 8000;
+    n.connect(hp); hp.connect(g); g.connect(musicGain);
+    n.start(ht); n.stop(ht + 0.05);
   }
 
-  // Melody — epic minor scale arpeggios
-  const melodyNotes = [220, 261.63, 329.63, 392, 329.63, 261.63, 349.23, 293.66]; // A3, C4, E4, G4, E4, C4, F4, D4
+  // Melody arpeggio
+  const melodyNotes = [220, 261.63, 329.63, 392, 329.63, 261.63, 349.23, 293.66];
   for (let i = 0; i < melodyNotes.length; i++) {
     const osc = audioCtx.createOscillator();
     const g = audioCtx.createGain();
@@ -287,33 +297,67 @@ function playMusicLoop() {
     g.gain.linearRampToValueAtTime(0.15, t + 0.05);
     g.gain.exponentialRampToValueAtTime(0.01, t + beatLen * 0.8);
     osc.connect(g); g.connect(musicGain);
-    osc.start(t);
-    osc.stop(t + beatLen);
+    osc.start(t); osc.stop(t + beatLen);
   }
 
-  // Pad / atmosphere
-  const padNotes = [130.81, 164.81, 196]; // C3, E3, G3 chord
+  // Pad chord
+  const padNotes = [130.81, 164.81, 196];
   for (const freq of padNotes) {
     const osc = audioCtx.createOscillator();
     const g = audioCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.value = freq;
+    osc.type = 'sine'; osc.frequency.value = freq;
     g.gain.setValueAtTime(0.04, now);
     g.gain.setValueAtTime(0.04, now + bassNotes.length * beatLen - 0.1);
     g.gain.linearRampToValueAtTime(0, now + bassNotes.length * beatLen);
     osc.connect(g); g.connect(musicGain);
-    osc.start(now);
-    osc.stop(now + bassNotes.length * beatLen);
+    osc.start(now); osc.stop(now + bassNotes.length * beatLen);
   }
 
-  // Schedule next loop
   const loopLen = bassNotes.length * beatLen;
-  setTimeout(() => playMusicLoop(), loopLen * 1000 - 50);
+  musicTimeout = setTimeout(() => playMusicLoop(), loopLen * 1000 - 50);
 }
 
 function stopMusic() {
   musicPlaying = false;
-  if (musicGain) { musicGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3); }
+  if (musicTimeout) { clearTimeout(musicTimeout); musicTimeout = null; }
+  if (musicGain) {
+    musicGain.gain.cancelScheduledValues(audioCtx.currentTime);
+    musicGain.gain.setValueAtTime(musicGain.gain.value, audioCtx.currentTime);
+    musicGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
+    // Disconnect after fade
+    const oldGain = musicGain;
+    setTimeout(() => { try { oldGain.disconnect(); } catch(e){} }, 300);
+    musicGain = null;
+  }
+}
+
+// --- Sound Effects ---
+function playShotSound() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  // Short punchy cannon shot
+  const osc = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(200, now);
+  osc.frequency.exponentialRampToValueAtTime(60, now + 0.08);
+  g.gain.setValueAtTime(0.2, now);
+  g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+  osc.connect(g); g.connect(sfxGain);
+  osc.start(now); osc.stop(now + 0.12);
+
+  // Noise burst for impact feel
+  const bufSz = audioCtx.sampleRate * 0.04;
+  const buf = audioCtx.createBuffer(1, bufSz, audioCtx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < bufSz; i++) d[i] = (Math.random() * 2 - 1);
+  const n = audioCtx.createBufferSource(); n.buffer = buf;
+  const ng = audioCtx.createGain();
+  ng.gain.setValueAtTime(0.12, now);
+  ng.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+  const bp = audioCtx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1500; bp.Q.value = 2;
+  n.connect(bp); bp.connect(ng); ng.connect(sfxGain);
+  n.start(now); n.stop(now + 0.05);
 }
 
 // --- Init ---
@@ -547,6 +591,7 @@ function spawnAlien(entry) {
 // SHOOTING
 // ============================================================
 function fireBullet() {
+  playShotSound();
   const tipX = cannon.x + Math.sin(cannon.angle)*35;
   const tipY = cannon.y - Math.cos(cannon.angle)*35;
   let color = '#ffdd00';
@@ -554,22 +599,24 @@ function fireBullet() {
   else if (player.element==='fire') color='#ff6600';
 
   const bulletCount = 1 + player.upgrades.fireAmount;
-  const sizeBonus = player.upgrades.projectiles * 2;
-  const speedBonus = player.upgrades.projectiles * 1;
+  const isBoomerang = player.upgrades.projectiles > 0;
+  const sizeBonus = isBoomerang ? player.upgrades.projectiles * 3 : 0;
   const canBounce = player.upgrades.bounceShot > 0;
 
   for (let i=0; i<bulletCount; i++) {
     let angle = cannon.angle;
     if (bulletCount > 1) {
-      const spread = 0.15; // radians between bullets
+      const spread = 0.15;
       angle += (i - (bulletCount-1)/2) * spread;
     }
-    const spd = BULLET_SPEED + speedBonus;
+    const spd = BULLET_SPEED;
     bullets.push({
       x: tipX, y: tipY,
       vx: Math.sin(angle)*spd, vy: -Math.cos(angle)*spd,
       radius: BULLET_RADIUS + sizeBonus, alive: true, color,
       bounces: canBounce ? 2 : 0,
+      boomerang: isBoomerang, boomerangTimer: 0, returning: false,
+      originX: cannon.x, originY: cannon.y,
     });
   }
 }
@@ -587,18 +634,19 @@ function circleRect(cx,cy,cr,rx,ry,rw,rh){
 function collisionPass() {
   for (let i=bullets.length-1;i>=0;i--) {
     const b=bullets[i]; if(!b.alive)continue;
+    const pierce = b.boomerang && b.returning; // boomerang pierces on return
     for (let j=aliens.length-1;j>=0;j--) {
       const a=aliens[j]; if(!a.alive)continue;
-      if(circleCircle(b.x,b.y,b.radius,a.x,a.y,a.radius)){ b.alive=false; damageAlien(a,player.damage); break; }
+      if(circleCircle(b.x,b.y,b.radius,a.x,a.y,a.radius)){ if(!pierce) b.alive=false; damageAlien(a,player.damage); if(!pierce) break; }
     }
     if(!b.alive)continue;
-    if(boss&&boss.alive&&circleCircle(b.x,b.y,b.radius,boss.x,boss.y,boss.radius)){ b.alive=false; damageBoss(player.damage); continue; }
+    if(boss&&boss.alive&&circleCircle(b.x,b.y,b.radius,boss.x,boss.y,boss.radius)){ if(!pierce) b.alive=false; damageBoss(player.damage); if(!pierce) continue; }
     for (let j=bossProjectiles.length-1;j>=0;j--) {
       const bp=bossProjectiles[j]; if(!bp.alive)continue;
       if(circleCircle(b.x,b.y,b.radius,bp.x,bp.y,bp.radius)){
-        b.alive=false; bp.hp-=player.damage;
+        if(!pierce) b.alive=false; bp.hp-=player.damage;
         if(bp.hp<=0){ bp.alive=false; spawnParticles(bp.x,bp.y,'#ff4444',4,0.2); }
-        break;
+        if(!pierce) break;
       }
     }
   }
@@ -652,6 +700,23 @@ function update(dt) {
   // Bullets
   for (let i=bullets.length-1;i>=0;i--) {
     const b=bullets[i];
+    // Boomerang: fly out, slow down, then curve back to cannon
+    if (b.boomerang) {
+      b.boomerangTimer += dt;
+      const flyTime = 0.4 + player.upgrades.projectiles * 0.15; // longer range with more stacks
+      if (!b.returning && b.boomerangTimer >= flyTime) {
+        b.returning = true;
+      }
+      if (b.returning) {
+        // Steer toward current cannon position
+        const dx = cannon.x - b.x, dy = cannon.y - b.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 15) { b.alive = false; continue; } // caught
+        const spd = BULLET_SPEED * 1.3;
+        b.vx = (dx/dist) * spd;
+        b.vy = (dy/dist) * spd;
+      }
+    }
     b.x+=b.vx*dt*60; b.y+=b.vy*dt*60;
     // Bounce off walls
     if (b.bounces > 0) {
@@ -659,9 +724,14 @@ function update(dt) {
       else if (b.x > canvas.width - b.radius) { b.x = canvas.width - b.radius; b.vx = -Math.abs(b.vx); b.bounces--; }
       if (b.y < b.radius) { b.y = b.radius; b.vy = Math.abs(b.vy); b.bounces--; }
     }
-    if (b.y > canvas.height+10 || b.x < -10 || b.x > canvas.width+10 || b.y < -10) {
-      if (b.bounces <= 0) b.alive = false;
+    // Kill non-boomerang bullets that leave screen
+    if (!b.boomerang) {
+      if (b.y > canvas.height+10 || b.x < -10 || b.x > canvas.width+10 || b.y < -10) {
+        if (b.bounces <= 0) b.alive = false;
+      }
     }
+    // Kill boomerang bullets that have been alive too long (safety)
+    if (b.boomerang && b.boomerangTimer > 4) b.alive = false;
   }
 
   collisionPass();
